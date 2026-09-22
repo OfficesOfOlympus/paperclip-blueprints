@@ -1,0 +1,64 @@
+{
+  "name": "Fintech Growth Q4",
+  "description": "Q4 outbound campaign targeting fintech founders and CMOs",
+  "channels": ["email", "linkedin"],
+  "research": {
+    "dailyTarget": 10,
+    "maxDailyTasks": 25,
+    "sources": ["linkedin", "crunchbase", "apollo"],
+    "enrichment": {
+      "email": true,
+      "phone": true,
+      "socialProfiles": true,
+      "companyInfo": true
+    },
+    "qualityThreshold": {
+      "minDomainAgeDays": 365,
+      "minEmployees": 10,
+      "maxEmployees": 200,
+      "requiredTechStack": ["stripe", "salesforce", "hubspot"]
+    }
+  },
+  "outreach": {
+    "dailyLimit": 30,
+    "maxSequences": 4,
+    "sequence": {
+      "daysBetween": 3,
+      "templates": {
+        "initialEmail": "Hi [FIRST],\n\nI noticed [COMPANY] is growing fast in the [INDUSTRY] space. We help fintechs like yours [VALUE_PROPOSITION].\n\nOpen to a 15-min chat this week?\n\nBest,\n[OUR_NAME]",
+        "followUp": [
+          "Hi [FIRST], following up on my previous note. Would love to show you how [COMPANY] could [BENEFIT].\n\nQuick 15-min call?\n\n[OUR_NAME]",
+          "Hi [FIRST], one last try — [VALUE_PROPOSITION] has helped similar fintechs [RESULT].\n\nWorth a conversation?\n\n[OUR_NAME]"
+        ],
+        "linkedinNote": "Hi [FIRST], noticed [COMPANY]'s growth in [INDUSTRY]. Would love to connect and share some insights on [TOPIC].",
+        "linkedinInMail": "Hi [FIRST],\n\nI see you're leading [TEAM] at [COMPANY]. We've helped similar fintech companies [RESULT] — would love to share how.\n\nOpen to a quick chat?\n\n[OUR_NAME]"
+      }
+    }
+  },
+  "replies": {
+    "autoQualify": true,
+    "qualificationCriteria": {
+      "budget": true,
+      "timeline": true,
+      "authority": true,
+      "need": true
+    },
+    "demoBooking": {
+      "enabled": true,
+      "calendarLink": "https://calendly.com/example"
+    }
+  },
+  "reporting": {
+    "daily": true,
+    "summaryTemplate": {
+      "includeMetrics": [
+        "leads_added",
+        "leads_contacted",
+        "leads_replied",
+        "leads_qualified",
+        "reply_rate",
+        "conversion_rate"
+      ]
+    }
+  }
+}
