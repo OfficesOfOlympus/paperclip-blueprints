@@ -51,6 +51,7 @@ import { uninstallCommand } from "./commands/uninstall.js";
 import { updateCommand } from "./commands/update.js";
 import { registerServiceCommands } from "./commands/service.js";
 import { registerConnectionIntentCommands } from "./commands/client/connections.js";
+import { bootstrapCommand } from "./commands/bootstrap.js";
 import {
   assertTestDriveDatabaseIsolation,
   prepareTestDriveEnvironment,
@@ -262,6 +263,9 @@ registerTeamCommands(program);
 registerWorktreeCommands(program);
 registerEnvLabCommands(program);
 registerPluginCommands(program);
+
+// ── Bootstrap ──────────────────────────────────────────────────────────────
+bootstrapCommand(program);
 
 const auth = program.command("auth").description("Authentication and bootstrap utilities");
 
