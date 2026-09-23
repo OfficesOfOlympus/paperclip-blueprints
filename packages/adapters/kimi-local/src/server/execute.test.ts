@@ -391,10 +391,12 @@ describe("kimi_local execute", () => {
 
     expect(seenArgs).toContain("--add-dir");
     expect(seenArgs[seenArgs.indexOf("--add-dir") + 1]).toBe(instructionsDir);
+    // Instructions are delivered via --add-dir (native channel), not concatenated into the prompt.
+    // The prompt should NOT contain instruction file paths — they're referenced via --add-dir instead.
     const prompt = seenArgs[seenArgs.length - 1];
-    expect(prompt).toContain("./HEARTBEAT.md");
-    expect(prompt).toContain("./SOUL.md");
-    expect(prompt).toContain("./TOOLS.md");
+    expect(prompt).not.toContain("./HEARTBEAT.md");
+    expect(prompt).not.toContain("./SOUL.md");
+    expect(prompt).not.toContain("./TOOLS.md");
   });
 
   it("loads the operational skill when no optional skills are configured", async () => {
