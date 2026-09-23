@@ -436,7 +436,6 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   const paperclipEnvNote = renderPaperclipEnvNote(remoteEnv);
   const prompt = joinPromptSections([
     selectInitialCommunicationGuidance(context, { resumedSession: canReuseSession }),
-    instructions.prefix,
     renderedBootstrapPrompt,
     wakePrompt,
     taskContextNote,

@@ -588,7 +588,6 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
       : renderTemplate(promptTemplate, templateData);
     const sessionHandoffNote = asString(context.paperclipSessionHandoffMarkdown, "").trim();
     const basePrompt = joinPromptSections([
-      instructionsPrefix,
       renderedBootstrapPrompt,
       wakePrompt,
       taskContextNote,

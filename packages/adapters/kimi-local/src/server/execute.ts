@@ -533,7 +533,6 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   const paperclipEnvNote = renderPaperclipEnvNote(env);
   const apiAccessNote = renderApiAccessNote(env);
   const basePrompt = joinPromptSections([
-    instructionsPrefix,
     renderedBootstrapPrompt,
     wakePrompt,
     taskContextNote,

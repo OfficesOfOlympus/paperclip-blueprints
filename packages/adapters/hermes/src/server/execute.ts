@@ -433,10 +433,12 @@ export async function execute(
   }
 
   // ── Build prompt ───────────────────────────────────────────────────────
+  // NOTE: agentInstructions are NOT concatenated into the CLI prompt here.
+  // They are delivered via the Hermes gateway's native system prompt channel
+  // (auxiliary_client.py line 1485). Re-injecting them as CLI prompt text
+  // causes the agent to re-process its own rules as executable directives,
+  // creating the `Query: ---` loop.
   let prompt = buildPrompt(ctx, config, { resumedSession: Boolean(prevSessionId) });
-  if (agentInstructions) {
-    prompt = agentInstructions + "\n\n---\n\n" + prompt;
-  }
 
   // ── Build command args ─────────────────────────────────────────────────
   // Use -Q (quiet) to get clean output: just response + session_id line

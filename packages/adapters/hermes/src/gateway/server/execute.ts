@@ -324,17 +324,23 @@ function buildRunBody(ctx: AdapterExecutionContext, sessionKey: string | null): 
   const paperclipApiUrl = nonEmpty(ctx.config.paperclipApiUrl);
   const payloadTemplate = parseObject(ctx.config.payloadTemplate);
   const configuredInput = nonEmpty(payloadTemplate.input);
-  const input = configuredInput && ctx.context.conversationMode === true
+  // Deliver instructions via the `input` field instead of a separate `instructions`
+  // field. The gateway agent re-injects `instructions` as a system prompt on every
+  // turn, creating the instruction-as-task loop. By embedding into `input` we send
+  // instructions once as user message context — no re-injection, no loop.
+  const rawInput = configuredInput && ctx.context.conversationMode === true
     ? `${configuredInput}\n\n${buildInput(ctx, paperclipApiUrl)}`
     : configuredInput ?? buildInput(ctx, paperclipApiUrl);
-  const instructions =
+  const instructionsText =
     nonEmpty(ctx.config.instructions) ??
     nonEmpty(payloadTemplate.instructions) ??
-    "Follow the Paperclip wake instructions exactly. Do not expose secrets in logs, comments, or final output.";
+    "";
+  const finalInput = instructionsText.trim().length > 0
+    ? `${instructionsText}\n\n${rawInput}`
+    : rawInput;
   return {
     ...payloadTemplate,
-    input,
-    instructions,
+    input: finalInput,
     ...(sessionKey ? { session_id: sessionKey } : {}),
   };
 }
