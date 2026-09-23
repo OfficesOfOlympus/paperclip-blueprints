@@ -71,10 +71,10 @@ function ChartLegend({ items }: { items: { color: string; label: string }[] }) {
 
 export function ChartCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="border border-border rounded-lg p-4 space-y-3">
+    <div className="border border-border/50 rounded-lg p-3 space-y-2">
       <div>
-        <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
-        {subtitle && <span className="text-(length:--text-nano) text-muted-foreground/60">{subtitle}</span>}
+        <h3 className="text-xs font-medium text-muted-foreground tracking-tight">{title}</h3>
+        {subtitle && <span className="text-(length:--text-nano) text-muted-foreground/50 mt-0.5 block">{subtitle}</span>}
       </div>
       {children}
     </div>

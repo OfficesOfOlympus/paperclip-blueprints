@@ -122,7 +122,7 @@ export function Sidebar({ children }: { children?: ReactNode }) {
         "w-full h-full min-h-0 flex flex-col",
         streamlinedUiEnabled
           ? primarySidebarStyles.surface
-          : "border-r border-border bg-background",
+          : "border-r border-border/60 bg-background",
       )}
     >
       {/* Top bar: company name, aligned with top sections and borderless.

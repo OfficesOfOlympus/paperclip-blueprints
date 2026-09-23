@@ -2347,6 +2347,53 @@ function OnboardingWizardInner({
     return (current - 1) as Step;
   }
 
+  /** Skip the current step's validation and jump to the next step. */
+  async function skipStep(): Promise<void> {
+    if (step === 1) {
+      // Create a minimal company if none exists yet
+      if (!createdCompanyId) {
+        try {
+          const company = await companiesApi.create({ name: "My Organization" });
+          queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
+          setCreatedCompanyId(company.id);
+          createdCompanyIdRef.current = company.id;
+          setCreatedCompanyPrefix(company.issuePrefix);
+          setSelectedCompanyId(company.id);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to create organization");
+          return;
+        }
+      }
+      setStep(3);
+    } else if (step === 3) {
+      // Create a minimal agent if none exists yet
+      if (!createdAgentId && createdCompanyId) {
+        try {
+          const agent = await agentsApi.create(createdCompanyId, {
+            name: "Assistant",
+            role: DEFAULT_AGENT_ROLE,
+            adapterType: "claude_local",
+            adapterConfig: {}
+          });
+          setCreatedAgentId(agent.id);
+          setAgentName("Assistant");
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to create agent");
+          return;
+        }
+      }
+      setStep(4);
+    } else if (step === 4) {
+      setStep(5);
+    }
+  }
+
+  /** Whether the current step has a skip target. */
+  const canSkipStep = step === 1 || step === 3 || step === 4;
+
+  /** Whether we can launch directly from step 5 without full validation. */
+  const canSkipToDashboard = step === 5 && (createdCompanyId || createdAgentId);
+
   const isAgentArcStep = agentArcStepFor(step) !== null;
   /**
    * True when the organization was named in Cloud rather than here.
@@ -3132,6 +3179,19 @@ function OnboardingWizardInner({
                     else handleLaunchToDashboard();
                   }}
                 />
+              )}
+
+              {/* Skip link — available on steps 1, 3, 4 to bypass validation */}
+              {canSkipStep && (
+                <div className="mt-4 text-center">
+                  <button
+                    type="button"
+                    onClick={skipStep}
+                    className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                  >
+                    Skip this step
+                  </button>
+                </div>
               )}
             </div>
           </div>

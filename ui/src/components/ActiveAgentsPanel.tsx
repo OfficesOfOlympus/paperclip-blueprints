@@ -177,14 +177,14 @@ export const AgentRunCard = memo(function AgentRunCard({
 
   return (
     <div className={cn(
-      "dashboard-agent-card flex min-w-0 flex-col overflow-hidden rounded-xl border",
+      "dashboard-agent-card flex min-w-0 flex-col overflow-hidden rounded-lg border",
       showTranscript && "h-(--sz-320px)",
       run.status === "running"
         ? "border-(--dashboard-run-border) bg-(--dashboard-run-background) shadow-(--shadow-extract-1)"
-        : "border-border bg-background/70",
+        : "border-border/50 bg-card",
       className,
     )} data-run-status={run.status}>
-      <div className={cn("flex shrink-0 flex-col gap-3 p-3", showTranscript && "border-b border-border/60")}>
+      <div className={cn("flex shrink-0 flex-col gap-2 p-2.5", showTranscript && "border-b border-border/50")}>
         <Link
           to={runUrl}
           title={`${run.agentName} — ${statusLabel} · ${timestamp}`}
@@ -197,7 +197,7 @@ export const AgentRunCard = memo(function AgentRunCard({
         {run.issueId ? (
           <Link
             to={`/issues/${issue?.identifier ?? run.issueId}`}
-            className="min-w-0 rounded-lg border border-border/60 bg-background/60 px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="min-w-0 rounded-lg border border-border/50 bg-card px-2 py-1.5 text-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             title={issue ? `${issue.title} · ${issue.identifier}` : taskTitle}
           >
             <span className="flex min-w-0 items-baseline gap-2">
@@ -214,7 +214,7 @@ export const AgentRunCard = memo(function AgentRunCard({
             </span>
           </Link>
         ) : (
-          <Link to={runUrl} className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/60 px-2.5 py-2 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link to={runUrl} className="flex items-center gap-1.5 rounded-lg border border-border/50 bg-card px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <Clock3 className="size-4 shrink-0" aria-hidden />
             <span className="truncate">{run.invocationSource === "timer" ? "Scheduled heartbeat" : "No linked task"}</span>
           </Link>

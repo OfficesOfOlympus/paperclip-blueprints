@@ -288,7 +288,7 @@ export function Dashboard() {
     pausedBanner?.kind === "imported" ? pausedBanner.pausedImportedAgentIds.length : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {error && <p className="text-sm text-destructive">{error.message}</p>}
 
       {pausedBanner?.kind === "imported" ? (
@@ -325,9 +325,9 @@ export function Dashboard() {
       ) : null}
 
       {hasNoAgents && (
-        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/25 dark:bg-amber-950/60">
-          <div className="flex items-center gap-2.5">
-            <Bot className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-300/50 bg-amber-50/80 px-3 py-2 dark:border-amber-500/25 dark:bg-amber-950/60">
+          <div className="flex items-center gap-2">
+            <Bot className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
             <p className="text-sm text-amber-900 dark:text-amber-100">
               You have no agents.
             </p>
@@ -346,25 +346,25 @@ export function Dashboard() {
       {data && (
         <>
           {data.budgets.activeIncidents > 0 ? (
-            <div className="flex items-start justify-between gap-3 rounded-xl border border-red-500/20 bg-(image:--gradient-extract-1) px-4 py-3">
-              <div className="flex items-start gap-2.5">
-                <PauseCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-700 dark:text-red-300" />
-                <div>
-                  <p className="text-sm font-medium text-red-950 dark:text-red-50">
-                    {data.budgets.activeIncidents} active budget incident{data.budgets.activeIncidents === 1 ? "" : "s"}
-                  </p>
-                  <p className="text-xs text-red-900/70 dark:text-red-100/70">
-                    {data.budgets.pausedAgents} agents paused · {data.budgets.pausedProjects} projects paused · {data.budgets.pendingApprovals} pending budget approvals
-                  </p>
+            <div className="flex items-start justify-between gap-3 rounded-md border border-red-500/20 bg-(image:--gradient-extract-1) px-3 py-2">
+                <div className="flex items-start gap-2">
+                  <PauseCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-700 dark:text-red-300" />
+                  <div>
+                    <p className="text-sm font-medium text-red-950 dark:text-red-50">
+                      {data.budgets.activeIncidents} active budget incident{data.budgets.activeIncidents === 1 ? "" : "s"}
+                    </p>
+                    <p className="text-xs text-red-900/70 dark:text-red-100/70">
+                      {data.budgets.pausedAgents} agents paused · {data.budgets.pausedProjects} projects paused · {data.budgets.pendingApprovals} pending budget approvals
+                    </p>
+                  </div>
                 </div>
+                <Link to="/costs" className="text-sm underline underline-offset-2 text-red-900 dark:text-red-100 shrink-0">
+                  Open budgets
+                </Link>
               </div>
-              <Link to="/costs" className="text-sm underline underline-offset-2 text-red-900 dark:text-red-100">
-                Open budgets
-              </Link>
-            </div>
           ) : null}
 
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-1 sm:gap-2">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3">
             <MetricCard
               icon={Bot}
               value={data.agents.active + data.agents.running + data.agents.paused + data.agents.error}
@@ -420,7 +420,7 @@ export function Dashboard() {
 
           <SmokeLabDashboardCard companyId={selectedCompanyId!} />
 
-          <div className={cn("grid grid-cols-2 gap-4", SHOW_TASK_PRIORITY_UI ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
+          <div className={cn("grid grid-cols-2 gap-3", SHOW_TASK_PRIORITY_UI ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
             <ChartCard title="Run Activity" subtitle="Last 14 days">
               <RunActivityChart activity={data.runActivity} />
             </ChartCard>
@@ -446,7 +446,7 @@ export function Dashboard() {
             itemClassName="rounded-lg border bg-card p-4 shadow-sm"
           />
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-3">
             {/* Recent Activity */}
             {recentActivity.length > 0 && (
               <div className="min-w-0">
