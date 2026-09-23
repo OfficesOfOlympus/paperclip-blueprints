@@ -1,3 +1,4 @@
+import { slackToolRoutes } from "./routes/slack-tools.js";
 import { agentAvatarRoutes } from "./routes/agent-avatars.js";
 import { aiConnectionRoutes } from "./routes/ai-connections.js";
 import { projectToolRoutes } from "./routes/project-tools.js";
@@ -120,7 +121,6 @@ import { adapterRoutes } from "./routes/adapters.js";
 import { managedAgentProfileRoutes } from "./routes/managed-agent-profiles.js";
 import { remoteAgentProfileRoutes } from "./routes/remote-agent-profiles.js";
 import { pluginUiStaticRoutes } from "./routes/plugin-ui-static.js";
-import { injectCloudUiSnippet } from "./cloud-ui-snippet.js";
 import { readBrandedStaticIndexHtml } from "./static-index-html.js";
 import { staticUiCacheControl } from "./static-ui-cache.js";
 import { applyUiBranding } from "./ui-branding.js";
@@ -841,6 +841,7 @@ export async function createApp(
     approveToolActionRequest: (input) => toolGateway.approveActionRequest(input),
     declineToolActionRequest: (input) => toolGateway.declineActionRequest(input),
   }));
+  api.use(slackToolRoutes(db, opts.authPublicBaseUrl));
   app.locals.toolGateway = toolGateway;
   app.locals.toolActionDeliveries = toolActionDeliveries;
   app.use(mcpGatewayProtocolRoutes(toolGateway));
@@ -1092,7 +1093,7 @@ export async function createApp(
     viteHtmlRenderer = createCachedViteHtmlRenderer({
       vite,
       uiRoot,
-      brandHtml: (html) => injectCloudUiSnippet(applyUiBranding(html)),
+      brandHtml: applyUiBranding,
     });
     const renderViteHtml = viteHtmlRenderer;
 
