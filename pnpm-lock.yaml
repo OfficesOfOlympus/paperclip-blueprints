@@ -1179,8 +1179,8 @@ importers:
         specifier: ^26.4.0
         version: 26.4.0(typescript@7.0.2)
       lexical:
-        specifier: 0.48.0
-        version: 0.48.0(typescript@7.0.2)
+        specifier: 0.51.0
+        version: 0.51.0(typescript@7.0.2)
       lucide-react:
         specifier: ^1.38.0
         version: 1.38.0(react@19.2.8)
@@ -2853,6 +2853,14 @@ packages:
 
   '@lexical/internal@0.48.0':
     resolution: {integrity: sha512-sRwg53K7N0ZQ7KNAvcCY38LSwGizbXP1zlR1lIojZp0GoqHWNvR+vL49t1wYXu1nXx3Osf4ilHHm+aGcwq5hTw==}
+    peerDependencies:
+      typescript: '>=5.2'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@lexical/internal@0.51.0':
+    resolution: {integrity: sha512-4f0k20V92koqXFpYPiu9MobSQuhTXtSL6RvQSjGKq4QOUMaNl+P5nNtvf2PN732ch/hEkWM7ZBw0WVlAmg9pxg==}
     peerDependencies:
       typescript: '>=5.2'
     peerDependenciesMeta:
@@ -7057,6 +7065,14 @@ packages:
       typescript:
         optional: true
 
+  lexical@0.51.0:
+    resolution: {integrity: sha512-uwThveE7nnR3ewETt9q7KBgbXVwtx7ZntJXWbonI/IrrdF7VtIbAGgqJcYxPchkQVjIppIzNoWaFolDd9Yph0g==}
+    peerDependencies:
+      typescript: '>=5.2'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   lib0@0.2.117:
     resolution: {integrity: sha512-DeXj9X5xDCjgKLU/7RR+/HQEVzuuEUiwldwOGsHK/sfAfELGWEyTcf0x+uOvCvK3O2zPmZePXWL85vtia6GyZw==}
     engines: {node: '>=16'}
@@ -7659,6 +7675,7 @@ packages:
 
   opencode-ai@1.18.32:
     resolution: {integrity: sha512-SCrZWdq44y/EoH2+fE4HLcXS+DzpVqHPzmXk3p2RrufYy8LWvpfhRhKtijb5ktvx8r94ScqToqwHxR0BwS65OQ==}
+    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -10663,6 +10680,10 @@ snapshots:
       typescript: 7.0.2
 
   '@lexical/internal@0.48.0(typescript@7.0.2)':
+    optionalDependencies:
+      typescript: 7.0.2
+
+  '@lexical/internal@0.51.0(typescript@7.0.2)':
     optionalDependencies:
       typescript: 7.0.2
 
@@ -14884,6 +14905,12 @@ snapshots:
   lexical@0.48.0(typescript@7.0.2):
     dependencies:
       '@lexical/internal': 0.48.0(typescript@7.0.2)
+    optionalDependencies:
+      typescript: 7.0.2
+
+  lexical@0.51.0(typescript@7.0.2):
+    dependencies:
+      '@lexical/internal': 0.51.0(typescript@7.0.2)
     optionalDependencies:
       typescript: 7.0.2
 
