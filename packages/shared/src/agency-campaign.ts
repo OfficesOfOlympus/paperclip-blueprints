@@ -173,7 +173,7 @@ export const campaignIssueTemplateSchema = z.object({
   // Phase this task belongs to
   phase: z.enum(["research", "outreach", "followup", "reply", "qualify", "convert"]),
   // Fields to seed on lead/interaction records
-  leadFields: z.record(z.unknown()).optional().nullable(),
+  leadFields: z.record(z.string(), z.unknown()).optional().nullable(),
   // Output format expectations
   outputFormat: z.enum(["markdown", "json", "text"]).optional().default("markdown"),
 });
@@ -215,7 +215,7 @@ export const outreachBatchSchema = z.object({
   templateId: z.string().uuid(),
   sequenceIndex: z.number().int().nonnegative().optional().default(0),
   sendAt: z.string().datetime().optional(),
-  personalization: z.record(z.string()).optional().describe("Template variable overrides per lead"),
+  personalization: z.record(z.string(), z.string()).optional().describe("Template variable overrides per lead"),
 });
 
 export type OutreachBatch = z.infer<typeof outreachBatchSchema>;
@@ -281,7 +281,7 @@ export const campaignLaunchResultSchema = z.object({
   campaignId: z.string().uuid().optional(),
   pipelineId: z.string().uuid().optional(),
   pipelineKey: z.string().optional(),
-  agentIds: z.record(z.string().uuid()).optional().describe("agent slug -> ID mapping"),
+  agentIds: z.record(z.string(), z.string().uuid()).optional().describe("agent slug -> ID mapping"),
   issuesCreated: z.number().int().nonnegative().optional().default(0),
   errors: z.array(z.string()).optional().default([]),
   warnings: z.array(z.string()).optional().default([]),

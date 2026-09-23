@@ -234,13 +234,12 @@ export function bootstrapCommand(program: ReturnType<typeof import("commander").
     bootstrap
       .command("launch")
       .description("Create a company, provision agents, write briefs, and start the agency")
-      .requiredOption("-f, --config <path>", "Path to bootstrap config JSON file")
+      .requiredOption("-f, --bootstrap-config <path>", "Path to bootstrap config JSON file")
       .option("-C, --company-id <id>", "Company ID (for existing company — skips company creation)")
       .option("--skip-agents", "Skip agent provisioning (company only)")
       .option("--dry-run", "Validate config and show what would happen without making changes")
-      .option("--json", "Output machine-readable JSON")
       .action(async (opts: {
-        config: string;
+        bootstrapConfig: string;
         companyId?: string;
         skipAgents?: boolean;
         dryRun?: boolean;
@@ -248,7 +247,7 @@ export function bootstrapCommand(program: ReturnType<typeof import("commander").
       }) => {
         try {
           // 1. Read and validate config
-          const configRaw = await fs.readFile(opts.config, "utf8");
+          const configRaw = await fs.readFile(opts.bootstrapConfig, "utf8");
           let config: BootstrapConfig;
           try {
             config = bootstrapAgencySchema.parse(JSON.parse(configRaw));
@@ -373,7 +372,6 @@ export function bootstrapCommand(program: ReturnType<typeof import("commander").
       .command("config:init")
       .description("Generate a bootstrap config template from a company profile")
       .requiredOption("-f, --output <path>", "Output config file path")
-      .option("-j, --json", "Output machine-readable JSON")
       .action(async (opts: {
         output: string;
         json?: boolean;

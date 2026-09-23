@@ -110,7 +110,7 @@ CREATE INDEX IF NOT EXISTS "idx_interactions_company_time" ON "interactions"("co
 CREATE INDEX IF NOT EXISTS "idx_interactions_replied" ON "interactions"("lead_id") WHERE "replied" = true;
 
 -- ---- assets: reusable templates & content ----
-CREATE TABLE IF NOT EXISTS "assets" (
+CREATE TABLE IF NOT EXISTS "agency_assets" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     "company_id" uuid NOT NULL REFERENCES "companies"("id") ON DELETE CASCADE,
     "campaign_id" uuid REFERENCES "campaigns"("id") ON DELETE SET NULL,
@@ -125,9 +125,9 @@ CREATE TABLE IF NOT EXISTS "assets" (
     "updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS "idx_assets_company" ON "assets"("company_id");
-CREATE INDEX IF NOT EXISTS "idx_assets_type" ON "assets"("type");
-CREATE INDEX IF NOT EXISTS "idx_assets_active" ON "assets"("company_id", "type") WHERE "is_active" = true;
+CREATE INDEX IF NOT EXISTS "idx_agency_assets_company" ON "agency_assets"("company_id");
+CREATE INDEX IF NOT EXISTS "idx_agency_assets_type" ON "agency_assets"("type");
+CREATE INDEX IF NOT EXISTS "idx_agency_assets_active" ON "agency_assets"("company_id", "type") WHERE "is_active" = true;
 
 -- ---- analytics: daily rollup metrics ----
 CREATE TABLE IF NOT EXISTS "analytics_daily" (
@@ -218,8 +218,8 @@ DROP TRIGGER IF EXISTS "tr_leads_updated" ON "leads";
 CREATE TRIGGER "tr_leads_updated" BEFORE UPDATE ON "leads"
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS "tr_assets_updated" ON "assets";
-CREATE TRIGGER "tr_assets_updated" BEFORE UPDATE ON "assets"
+DROP TRIGGER IF EXISTS "tr_agency_assets_updated" ON "agency_assets";
+CREATE TRIGGER "tr_agency_assets_updated" BEFORE UPDATE ON "agency_assets"
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ---- Views: common queries ----

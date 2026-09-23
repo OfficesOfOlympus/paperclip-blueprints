@@ -1,11 +1,6 @@
 import { AgentIdentity } from "../components/AgentIdentity";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "@/lib/router";
-import {
-  onboardingStepForCompany,
-  shouldRouteAgentlessCompanyToOnboarding,
-} from "../lib/onboarding-route";
-import { claimOnboardingOffer } from "../lib/onboarding-auto-open";
 import { Link } from "@/lib/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { dashboardApi } from "../api/dashboard";
@@ -118,41 +113,13 @@ export function Dashboard() {
   // to show. The banner below already says so and offers a link; this takes
   // the customer there instead of asking them to notice.
   //
-  // It also closes the gap a Cloud-provisioned stack falls into. Cloud creates
-  // the company before the tenant boots, so the companyless redirect never
-  // fires and a seeded customer lands here, on an empty dashboard, straight
-  // out of signup.
-  //
   // Opened as the dialog rather than navigated to: the wizard is already
   // mounted globally, so there is no route to race and no redirect to loop.
   // Placed with the other hooks — the early returns below mean anything
   // further down would be called conditionally.
   //
-  // The company and the step are both passed. Opening with empty options would
-  // start the wizard at the front door with no company, and the new-company
-  // path there would create a *second* company instead of giving this one an
-  // agent.
-  const shouldOpenOnboarding = shouldRouteAgentlessCompanyToOnboarding({
-    pathname: location.pathname,
-    agentsLoaded: agents !== undefined,
-    agentsRefreshing,
-    agentCount: agents?.length ?? 0,
-  });
-  // Auto-open once per company. Every input to the effect sits behind a query,
-  // so a refetch re-runs it, and the customer can also navigate away and come
-  // back — both would otherwise call `openOnboarding` again and reopen a
-  // wizard that was deliberately closed. `claimOnboardingOffer` holds the
-  // companies already offered; see it for why that outlives this component.
-  useEffect(() => {
-    if (!shouldOpenOnboarding || !selectedCompanyId) return;
-    if (!claimOnboardingOffer(selectedCompanyId)) return;
-    openOnboarding({
-      companyId: selectedCompanyId,
-      initialStep: onboardingStepForCompany(),
-    });
-    // No mission lookup to wait on any more: the step this opens is the same
-    // whatever the goals say, so waiting only delayed the open.
-  }, [shouldOpenOnboarding, selectedCompanyId, openOnboarding]);
+  // NOTE: Onboarding auto-open disabled to allow GUI access with zero agents.
+  // The "Add agent" card is still available on the dashboard.
 
   useEffect(() => {
     setBreadcrumbs([{ label: "Dashboard" }]);

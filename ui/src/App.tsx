@@ -100,13 +100,8 @@ import { InviteLandingPage } from "./pages/InviteLanding";
 import { JoinRequestQueue } from "./pages/JoinRequestQueue";
 import { NotFoundPage } from "./pages/NotFound";
 import { useCompany } from "./context/CompanyContext";
-import { useDialogActions, useDialogState } from "./context/DialogContext";
+import { useDialogState } from "./context/DialogContext";
 import { loadLastInboxTab } from "./lib/inbox";
-import {
-  isOnboardingWizardActive,
-  onboardingStepForCompany,
-  shouldRedirectCompanylessRouteToOnboarding,
-} from "./lib/onboarding-route";
 import { filterHiddenInstanceSettingsPath, normalizeRememberedInstanceSettingsPath } from "./lib/instance-settings";
 import { useCloudInstance } from "./hooks/useCloudInstance";
 import { useStreamlinedUiEnabled } from "./hooks/useStreamlinedUiEnabled";
@@ -498,15 +493,7 @@ function LegacySettingsRedirect() {
     null;
 
   if (!targetCompany) {
-    if (
-      shouldRedirectCompanylessRouteToOnboarding({
-        pathname: location.pathname,
-        hasCompanies: false,
-      })
-    ) {
-      return <Navigate to="/onboarding" replace />;
-    }
-    return <NoCompaniesStartPage />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const normalizedPath = filterHiddenInstanceSettingsPath(
@@ -545,84 +532,11 @@ function legacyToolsRedirectTarget(tab?: string) {
 }
 
 export function OnboardingRoutePage() {
-  const { companies } = useCompany();
-  const { openOnboarding } = useDialogActions();
-  const { t } = useTranslation();
-  const cloudInstance = useCloudInstance();
-  const createStackUrl = cloudStackCreateUrl(cloudInstance?.cloudBaseUrl ?? null);
-  const { onboardingOpen, onboardingRouteDismissed } = useDialogState();
-  const { companyPrefix } = useParams<{ companyPrefix?: string }>();
-  const matchedCompany = companyPrefix
-    ? companies.find((company) => company.issuePrefix.toUpperCase() === companyPrefix.toUpperCase()) ?? null
-    : null;
-  // The OnboardingWizard auto-opens on this route (and can also be opened
-  // explicitly). While it is showing it covers the whole screen, so the
-  // launcher card below must not stay interactive behind it — otherwise users
-  // can tab/click through to the form behind the modal (PAP-52). The launcher
-  // only needs to render as a re-entry point once the wizard is dismissed.
-  if (isOnboardingWizardActive({ onboardingOpen, routeDismissed: onboardingRouteDismissed })) {
-    return null;
-  }
-
-  const title = matchedCompany
-    ? `Add another agent to ${matchedCompany.name}`
-    : companies.length > 0
-      ? "Create another organization"
-      : "Create your first organization";
-  const description = matchedCompany
-    ? "Run onboarding again to add an agent and a starter task for this organization."
-    : companies.length > 0
-      ? "Run onboarding again to create another organization and seed its first agent."
-      : "Get started by creating an organization and your first agent.";
-
-  return (
-    <div className="mx-auto max-w-xl py-10">
-      <div className="rounded-lg border border-border bg-card p-6">
-        <h1 className="text-xl font-semibold">{title}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-        <div className="mt-4">
-          {/* On a managed stack whose Cloud origin is unknown there is nowhere
-              to send this click: creation lives on Cloud, and in-app creation
-              is a 403 floor. A button that does nothing is worse than none, so
-              say why instead of rendering an inert control. */}
-          {!matchedCompany && cloudInstance && !createStackUrl ? (
-            <p className="text-sm text-muted-foreground">
-              {t("app.cloudCreateUnavailable", {
-                defaultValue:
-                  "Organizations are created in Paperclip Cloud. This instance can't reach it right now — try again from your Cloud portfolio.",
-              })}
-            </p>
-          ) : (
-            <Button
-              onClick={() =>
-                matchedCompany
-                  ? openOnboarding({
-                      // "Add another agent" to a company that already has its
-                      // mission must not stop to ask for the mission again. An
-                      // unsettled or failed lookup reads as "no mission" and
-                      // costs the step, which the customer can pass - and the
-                      // mission step now updates the existing goal rather than
-                      // adding a second one.
-                      initialStep: onboardingStepForCompany(),
-                      companyId: matchedCompany.id,
-                    })
-                  : cloudInstance && createStackUrl
-                    ? navigateTopLevel(createStackUrl)
-                    : openOnboarding()
-              }
-            >
-              {matchedCompany ? "Add Agent" : "Start Onboarding"}
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  return <Navigate to="/dashboard" replace />;
 }
 
 function CompanyRootRedirect() {
   const { companies, selectedCompany, loading } = useCompany();
-  const location = useLocation();
 
   if (loading) {
     return <PaperclipLoading />;
@@ -630,15 +544,7 @@ function CompanyRootRedirect() {
 
   const targetCompany = selectedCompany ?? companies[0] ?? null;
   if (!targetCompany) {
-    if (
-      shouldRedirectCompanylessRouteToOnboarding({
-        pathname: location.pathname,
-        hasCompanies: false,
-      })
-    ) {
-      return <Navigate to="/onboarding" replace />;
-    }
-    return <NoCompaniesStartPage />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Navigate to={`/${targetCompany.issuePrefix}/dashboard`} replace />;
@@ -675,15 +581,7 @@ function UnprefixedBoardRedirect() {
 
   const targetCompany = selectedCompany ?? companies[0] ?? null;
   if (!targetCompany) {
-    if (
-      shouldRedirectCompanylessRouteToOnboarding({
-        pathname: location.pathname,
-        hasCompanies: false,
-      })
-    ) {
-      return <Navigate to="/onboarding" replace />;
-    }
-    return <NoCompaniesStartPage />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
@@ -695,43 +593,21 @@ function UnprefixedBoardRedirect() {
 }
 
 function NoCompaniesStartPage() {
-  const { openOnboarding } = useDialogActions();
   const { t } = useTranslation();
-  // A managed stack with no visible companies is a loading or error state, not
-  // an invitation to create one in-app — creation lives on Cloud (403 floor).
-  const cloudInstance = useCloudInstance();
-  const createStackUrl = cloudStackCreateUrl(cloudInstance?.cloudBaseUrl ?? null);
 
   return (
     <div className="mx-auto max-w-xl py-10">
       <div className="rounded-lg border border-border bg-card p-6">
         <h1 className="text-xl font-semibold">
-          {t("app.noCompanies.title", { defaultValue: "Create your first organization" })}
+          {t("app.noCompanies.title", { defaultValue: "Welcome to Paperclip" })}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {t("app.noCompanies.description", { defaultValue: "Get started by creating an organization." })}
+          {t("app.noCompanies.description", { defaultValue: "Setting up your workspace..." })}
         </p>
         <div className="mt-4">
-          {/* Same as the onboarding route: no Cloud origin means nowhere to
-              send the click, and in-app creation is a 403 floor here. */}
-          {cloudInstance && !createStackUrl ? (
-            <p className="text-sm text-muted-foreground">
-              {t("app.cloudCreateUnavailable", {
-                defaultValue:
-                  "Organizations are created in Paperclip Cloud. This instance can't reach it right now — try again from your Cloud portfolio.",
-              })}
-            </p>
-          ) : (
-            <Button
-              onClick={() =>
-                cloudInstance && createStackUrl
-                  ? navigateTopLevel(createStackUrl)
-                  : openOnboarding()
-              }
-            >
-              {t("app.noCompanies.newCompany", { defaultValue: "New Organization" })}
-            </Button>
-          )}
+          <Button onClick={() => (window.location.href = "/dashboard")}>
+            {t("app.noCompanies.newCompany", { defaultValue: "Go to Dashboard" })}
+          </Button>
         </div>
       </div>
     </div>

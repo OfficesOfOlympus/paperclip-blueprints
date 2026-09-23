@@ -15,7 +15,7 @@ import {
   type LeadTemplate,
   type ReplyTemplate,
   type CampaignAnalytics,
-} from "@paperclipai/shared/agency-campaign.js";
+} from "@paperclipai/shared/agency-campaign";
 import { createIssueSchema } from "@paperclipai/shared/validators/issue.js";
 
 function parseJson(text: string): unknown {
@@ -36,7 +36,7 @@ interface CampaignBaseOptions extends BaseClientOptions {
 }
 
 interface CampaignLaunchOptions extends CampaignBaseOptions {
-  config: string;
+  campaignConfig: string;
   dryRun?: boolean;
   skipResearch?: boolean;
 }
@@ -129,7 +129,7 @@ async function campaignLaunch(opts: CampaignLaunchOptions): Promise<void> {
   const ctx = resolveCommandContext(opts, { requireCompany: true });
 
   // Load & validate config
-  const configContent = await fs.readFile(opts.config, "utf-8");
+  const configContent = await fs.readFile(opts.campaignConfig, "utf-8");
   const rawConfig = parseJson(configContent) as unknown;
   const config = campaignSchema.parse(rawConfig);
 
@@ -746,7 +746,10 @@ export function registerCampaignCommands(program: any): void {
     campaigns
       .command("launch")
       .description("Create a campaign pipeline and tasks from config"),
-  ).requiredOption("-f, --config <path>", "Campaign config file (JSON)");
+  ).requiredOption("-f, --campaign-config <path>", "Campaign config file (JSON)")
+  .action(async (opts: CampaignLaunchOptions) => {
+    try { await campaignLaunch(opts); } catch (err) { handleCommandError(err); }
+  });
 
   addCommonClientOptions(
     campaigns
@@ -757,7 +760,10 @@ export function registerCampaignCommands(program: any): void {
     .option("--count <n>", "Target lead count (for guided research)")
     .option("--fields-file <path>", "JSON file with lead data array")
     .option("--fields-json <json>", "Inline JSON lead data")
-    .option("--skip-enrichment", "Skip enrichment step");
+    .option("--skip-enrichment", "Skip enrichment step")
+    .action(async (opts: CampaignLeadsOptions) => {
+      try { await generateLeads(opts); } catch (err) { handleCommandError(err); }
+    });
 
   addCommonClientOptions(
     campaigns
@@ -768,7 +774,10 @@ export function registerCampaignCommands(program: any): void {
     .requiredOption("--channel <channel>", "Outreach channel (email, linkedin, twitter, webhook)")
     .option("--lead-ids <csv>", "Comma-separated lead IDs")
     .option("--sequence-index <n>", "Sequence index (default: 0)")
-    .option("--dry-run", "Preview without sending");
+    .option("--dry-run", "Preview without sending")
+    .action(async (opts: CampaignOutreachOptions) => {
+      try { await outboundOutreach(opts); } catch (err) { handleCommandError(err); }
+    });
 
   addCommonClientOptions(
     campaigns
@@ -777,7 +786,10 @@ export function registerCampaignCommands(program: any): void {
   )
     .requiredOption("--campaign-key <key>", "Campaign key")
     .option("--file <path>", "JSON file with reply data")
-    .option("--reply-json <json>", "Inline JSON reply data");
+    .option("--reply-json <json>", "Inline JSON reply data")
+    .action(async (opts: CampaignRepliesOptions) => {
+      try { await handleReplies(opts); } catch (err) { handleCommandError(err); }
+    });
 
   addCommonClientOptions(
     campaigns
@@ -786,88 +798,28 @@ export function registerCampaignCommands(program: any): void {
   )
     .requiredOption("--campaign-key <key>", "Campaign key")
     .option("--days-since <n>", "Days since last contact (default: 3)")
-    .option("--dry-run", "Preview without queuing");
+    .option("--dry-run", "Preview without queuing")
+    .action(async (opts: CampaignFollowupsOptions) => {
+      try { await followUps(opts); } catch (err) { handleCommandError(err); }
+    });
 
   addCommonClientOptions(
     campaigns
       .command("report")
       .description("Generate campaign performance report"),
-  ).requiredOption("--campaign-key <key>", "Campaign key");
+  ).requiredOption("--campaign-key <key>", "Campaign key")
+  .action(async (opts: CampaignReportOptions) => {
+    try { await report(opts); } catch (err) { handleCommandError(err); }
+  });
 
   addCommonClientOptions(
     campaigns
       .command("status")
       .description("Quick overview of campaign state"),
-  ).requiredOption("--campaign-key <key>", "Campaign key");
+  ).requiredOption("--campaign-key <key>", "Campaign key")
+  .action(async (opts: CampaignStatusOptions) => {
+    try { await status(opts); } catch (err) { handleCommandError(err); }
+  });
 
-  // ── Action Handlers ────────────────────────────────────────────────────
-  campaigns
-    .command("launch")
-    .action(async (opts: CampaignLaunchOptions) => {
-      try {
-        await campaignLaunch(opts);
-      } catch (err) {
-        handleCommandError(err);
-      }
-    });
-
-  campaigns
-    .command("generate-leads")
-    .action(async (opts: CampaignLeadsOptions) => {
-      try {
-        await generateLeads(opts);
-      } catch (err) {
-        handleCommandError(err);
-      }
-    });
-
-  campaigns
-    .command("outreach")
-    .action(async (opts: CampaignOutreachOptions) => {
-      try {
-        await outboundOutreach(opts);
-      } catch (err) {
-        handleCommandError(err);
-      }
-    });
-
-  campaigns
-    .command("handle-replies")
-    .action(async (opts: CampaignRepliesOptions) => {
-      try {
-        await handleReplies(opts);
-      } catch (err) {
-        handleCommandError(err);
-      }
-    });
-
-  campaigns
-    .command("followups")
-    .action(async (opts: CampaignFollowupsOptions) => {
-      try {
-        await followUps(opts);
-      } catch (err) {
-        handleCommandError(err);
-      }
-    });
-
-  campaigns
-    .command("report")
-    .action(async (opts: CampaignReportOptions) => {
-      try {
-        await report(opts);
-      } catch (err) {
-        handleCommandError(err);
-      }
-    });
-
-  campaigns
-    .command("status")
-    .action(async (opts: CampaignStatusOptions) => {
-      try {
-        await status(opts);
-      } catch (err) {
-        handleCommandError(err);
-      }
-    });
+  // ── End of Campaign Command Registration ─────────────────────────────────
 }
