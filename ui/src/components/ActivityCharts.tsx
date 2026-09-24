@@ -1,4 +1,5 @@
 import type { DashboardRunActivityDay, HeartbeatRun } from "@paperclipai/shared";
+import { formatCents } from "../lib/utils";
 
 /* ---- Utilities ---- */
 
@@ -323,6 +324,47 @@ export function SuccessRateChart(props: RunChartProps) {
         })}
       </div>
       <DateLabels days={days} />
+    </div>
+  );
+}
+
+// Cost chart: simple monthly spend vs budget bar (no daily trend in dashboard summary).
+export function CostChart({
+  monthSpendCents,
+  monthBudgetCents,
+  monthUtilizationPercent,
+}: {
+  monthSpendCents: number;
+  monthBudgetCents: number;
+  monthUtilizationPercent: number;
+}) {
+  const budgetActive = monthBudgetCents > 0;
+  const barWidth = budgetActive ? Math.min(monthUtilizationPercent, 100) : 100;
+  const barColor =
+    barWidth >= 90
+      ? "var(--status-task-icon-blocked)"
+      : barWidth >= 60
+        ? "var(--hex-eab308)"
+        : "var(--status-task-icon-done)";
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-baseline gap-2">
+        <span className="text-lg font-semibold text-foreground">{formatCents(monthSpendCents)}</span>
+        <span className="text-xs text-muted-foreground">
+          {budgetActive ? `of ${formatCents(monthBudgetCents)} budget (${monthUtilizationPercent}%)` : "Unlimited budget"}
+        </span>
+      </div>
+      <div className="h-3 w-full rounded-full bg-muted/30 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${barWidth}%`, backgroundColor: barColor }}
+        />
+      </div>
+      <div className="flex gap-4 text-xs text-muted-foreground">
+        <span>Spend: {formatCents(monthSpendCents)}</span>
+        {budgetActive && <span>Budget: {formatCents(monthBudgetCents)}</span>}
+      </div>
     </div>
   );
 }

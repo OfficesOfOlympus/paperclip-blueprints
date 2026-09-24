@@ -1,4 +1,3 @@
-import { AgentIdentity } from "../components/AgentIdentity";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "@/lib/router";
 import { Link } from "@/lib/router";
@@ -16,23 +15,19 @@ import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
 import { MetricCard } from "../components/MetricCard";
 import { EmptyState } from "../components/EmptyState";
-import { StatusIcon } from "../components/StatusIcon";
 import { usePublishSharedQueryData, useSharedPollingQuery } from "../hooks/useSharedPolling";
 
 import { ActivityRow } from "../components/ActivityRow";
-import { timeAgo } from "../lib/timeAgo";
-import { cn, formatCents } from "../lib/utils";
-import { SHOW_TASK_PRIORITY_UI } from "../lib/ui-flags";
-import { Bot, CircleDot, DollarSign, ShieldCheck, LayoutDashboard, PauseCircle } from "lucide-react";
+import { formatCents } from "../lib/utils";
+import { Bot, CircleDot, DollarSign, ShieldCheck, LayoutDashboard, PauseCircle, Clock, AlertTriangle } from "lucide-react";
 import { ActiveAgentsPanel } from "../components/ActiveAgentsPanel";
-import { ChartCard, RunActivityChart, PriorityChart, IssueStatusChart, SuccessRateChart } from "../components/ActivityCharts";
+import { ChartCard, RunActivityChart, IssueStatusChart, CostChart } from "../components/ActivityCharts";
+import type { Agent, Issue } from "@paperclipai/shared";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InlineBanner } from "../components/InlineBanner";
-import type { Agent, Issue } from "@paperclipai/shared";
 import { PluginSlotOutlet } from "@/plugins/slots";
-import { SmokeLabDashboardCard } from "../components/SmokeLabDashboardCard";
 
 const DASHBOARD_ACTIVITY_LIMIT = 10;
 
@@ -341,29 +336,8 @@ export function Dashboard() {
         </div>
       )}
 
-      <ActiveAgentsPanel companyId={selectedCompanyId!} />
-
       {data && (
         <>
-          {data.budgets.activeIncidents > 0 ? (
-            <div className="flex items-start justify-between gap-3 rounded-md border border-red-500/20 bg-(image:--gradient-extract-1) px-3 py-2">
-                <div className="flex items-start gap-2">
-                  <PauseCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-700 dark:text-red-300" />
-                  <div>
-                    <p className="text-sm font-medium text-red-950 dark:text-red-50">
-                      {data.budgets.activeIncidents} active budget incident{data.budgets.activeIncidents === 1 ? "" : "s"}
-                    </p>
-                    <p className="text-xs text-red-900/70 dark:text-red-100/70">
-                      {data.budgets.pausedAgents} agents paused · {data.budgets.pausedProjects} projects paused · {data.budgets.pendingApprovals} pending budget approvals
-                    </p>
-                  </div>
-                </div>
-                <Link to="/costs" className="text-sm underline underline-offset-2 text-red-900 dark:text-red-100 shrink-0">
-                  Open budgets
-                </Link>
-              </div>
-          ) : null}
-
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3">
             <MetricCard
               icon={Bot}
@@ -418,23 +392,40 @@ export function Dashboard() {
             />
           </div>
 
-          <SmokeLabDashboardCard companyId={selectedCompanyId!} />
+          {data.budgets.activeIncidents > 0 ? (
+            <div className="flex items-start justify-between gap-3 rounded-md border border-red-500/20 bg-card px-3 py-2">
+                <div className="flex items-start gap-2">
+                  <PauseCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-700 dark:text-red-300" />
+                  <div>
+                    <p className="text-sm font-medium text-red-950 dark:text-red-50">
+                      {data.budgets.activeIncidents} active budget incident{data.budgets.activeIncidents === 1 ? "" : "s"}
+                    </p>
+                    <p className="text-xs text-red-900/70 dark:text-red-100/70">
+                      {data.budgets.pausedAgents} agents paused · {data.budgets.pausedProjects} projects paused · {data.budgets.pendingApprovals} pending budget approvals
+                    </p>
+                  </div>
+                </div>
+                <Link to="/costs" className="text-sm underline underline-offset-2 text-red-900 dark:text-red-100 shrink-0">
+                  Open budgets
+                </Link>
+              </div>
+          ) : null}
 
-          <div className={cn("grid grid-cols-2 gap-3", SHOW_TASK_PRIORITY_UI ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
+          <ActiveAgentsPanel companyId={selectedCompanyId!} />
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <ChartCard title="Run Activity" subtitle="Last 14 days">
               <RunActivityChart activity={data.runActivity} />
             </ChartCard>
-            {/* PAP-411: "Tasks by Priority" chart hidden behind SHOW_TASK_PRIORITY_UI. */}
-            {SHOW_TASK_PRIORITY_UI && (
-              <ChartCard title="Tasks by Priority" subtitle="Last 14 days">
-                <PriorityChart issues={issues ?? []} />
-              </ChartCard>
-            )}
             <ChartCard title="Tasks by Status" subtitle="Last 14 days">
               <IssueStatusChart issues={issues ?? []} />
             </ChartCard>
-            <ChartCard title="Success Rate" subtitle="Last 14 days">
-              <SuccessRateChart activity={data.runActivity} />
+            <ChartCard title="Budget Utilization" subtitle="This month">
+              <CostChart
+                monthSpendCents={data.costs.monthSpendCents}
+                monthBudgetCents={data.costs.monthBudgetCents}
+                monthUtilizationPercent={data.costs.monthUtilizationPercent}
+              />
             </ChartCard>
           </div>
 
@@ -469,47 +460,47 @@ export function Dashboard() {
               </div>
             )}
 
-            {/* Recent Tasks */}
+            {/* Stale Tasks */}
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                Recent Tasks
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                <Clock className="h-3.5 w-3.5" />
+                Stale Tasks
               </h3>
-              {recentIssues.length === 0 ? (
+              {!data ? null : data.staleTasks.length === 0 ? (
                 <Card className="block p-4">
-                  <p className="text-sm text-muted-foreground">No tasks yet.</p>
+                  <p className="text-sm text-muted-foreground">No stale tasks. All active work is progressing.</p>
                 </Card>
               ) : (
                 <Card className="@container block py-0 divide-y divide-border overflow-hidden">
-                  {recentIssues.slice(0, 10).map((issue) => (
+                  {data.staleTasks.map((task) => (
                     <Link
-                      key={issue.id}
-                      to={`/issues/${issue.identifier ?? issue.id}`}
-                      className="dashboard-list-row text-sm cursor-pointer hover:bg-accent/50 transition-colors no-underline text-inherit block"
+                      key={task.id}
+                      to={`/issues/${task.identifier ?? task.id}`}
+                      className="dashboard-list-row text-sm cursor-pointer hover:bg-accent/50 transition-colors no-underline text-inherit block px-3 py-2"
                     >
                       <div className="flex items-start gap-2 @xl:grid @xl:grid-cols-(--dashboard-task-list-columns) @xl:items-baseline">
-                        <span className="flex size-6 shrink-0 items-center justify-end @xl:self-center">
-                          <StatusIcon status={issue.status} externalConversationState={issue.externalConversationState} blockerAttention={issue.blockerAttention} />
+                        <span className="flex size-6 shrink-0 items-center justify-start @xl:self-center">
+                          <AlertTriangle className="h-4 w-4 text-amber-500 dark:text-amber-400" />
                         </span>
                         <span className="flex min-w-0 flex-1 flex-col gap-1 @xl:contents">
                           <span className="flex min-w-0 items-baseline gap-2 @xl:contents">
-                            <span className="min-w-0 flex-1 truncate text-sm leading-6" title={issue.title}>
-                              {issue.title}
+                            <span className="min-w-0 flex-1 truncate text-sm leading-6" title={task.title}>
+                              {task.title}
                             </span>
                             <span className="ml-auto shrink-0 truncate text-right font-mono text-(length:--text-micro) text-muted-foreground @xl:col-start-4 @xl:row-start-1 @xl:w-(--dashboard-list-id-width)">
-                              {issue.identifier ?? issue.id.slice(0, 8)}
+                              {task.identifier ?? task.id.slice(0, 8)}
                             </span>
                           </span>
                           <span className="flex min-h-6 min-w-0 items-center gap-2 @xl:contents">
                             <span className="flex min-w-0 flex-1 items-center @xl:col-start-3 @xl:row-start-1 @xl:self-center">
-                              {issue.assigneeAgentId && (() => {
-                                const name = agentName(issue.assigneeAgentId);
-                                return name
-                                  ? <AgentIdentity agent={agents?.find(agent => agent.id === issue.assigneeAgentId) ?? { id: issue.assigneeAgentId ?? undefined, name }} size="sm" className="max-w-32" />
-                                  : null;
-                              })()}
+                              {task.agentName && (
+                                <span className="text-xs text-muted-foreground">
+                                  Assigned to {task.agentName}
+                                </span>
+                              )}
                             </span>
-                            <span className="ml-auto w-(--dashboard-list-time-width) shrink-0 whitespace-nowrap text-right text-xs text-muted-foreground">
-                              {timeAgo(issue.updatedAt)}
+                            <span className="ml-auto w-(--dashboard-list-time-width) shrink-0 whitespace-nowrap text-right text-xs text-amber-600 dark:text-amber-400 font-medium">
+                              {task.staleHours}h stale
                             </span>
                           </span>
                         </span>

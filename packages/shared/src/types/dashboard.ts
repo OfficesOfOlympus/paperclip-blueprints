@@ -24,6 +24,15 @@ export interface DashboardRunActivityDay {
   failedByErrorCode: Record<string, number>;
 }
 
+export interface StaleTask {
+  id: string;
+  identifier: string;
+  title: string;
+  status: string;
+  agentName: string | null;
+  staleHours: number;
+}
+
 export interface DashboardSummary {
   companyId: string;
   agents: {
@@ -50,5 +59,6 @@ export interface DashboardSummary {
     pausedAgents: number;
     pausedProjects: number;
   };
+  staleTasks: StaleTask[];
   runActivity: DashboardRunActivityDay[];
 }

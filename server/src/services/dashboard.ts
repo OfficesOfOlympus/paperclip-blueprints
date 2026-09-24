@@ -1,6 +1,7 @@
 import { and, eq, gte, sql } from "drizzle-orm";
 import type { Db } from "@paperclipai/db";
 import { agents, approvals, companies, costEvents, heartbeatRuns, issues } from "@paperclipai/db";
+import type { StaleTask } from "@paperclipai/shared";
 import { notFound } from "../errors.js";
 import { budgetService } from "./budgets.js";
 import { executionIssueCondition } from "./issue-visibility.js";
@@ -184,6 +185,50 @@ export function dashboardService(db: Db) {
           ? (monthSpendCents / company.budgetMonthlyCents) * 100
           : 0;
       const budgetOverview = await budgets.overview(companyId);
+
+      // Stale tasks: in_progress issues with no heartbeat run in the last 12 hours
+      const staleCutoff = new Date();
+      staleCutoff.setHours(staleCutoff.getHours() - 12);
+      const staleRows = await db.execute(sql`
+        SELECT
+          i.id,
+          i.identifier,
+          i.title,
+          i.status,
+          a.name,
+          i.updated_at
+        FROM issues i
+        LEFT JOIN heartbeat_runs hr
+          ON hr.context_snapshot->>'issueId' = i.id
+          AND hr.company_id = ${companyId}
+          AND hr.created_at >= ${staleCutoff.toISOString()}::timestamptz
+        LEFT JOIN agents a ON a.id = hr.agent_id
+        WHERE i.company_id = ${companyId}
+          AND i.status = 'in_progress'
+          AND ${executionIssueCondition()}
+        GROUP BY i.id, i.identifier, i.title, i.status, a.name
+        HAVING count(hr.id) = 0
+        ORDER BY i.updated_at ASC
+      `) as unknown as Array<{
+        id: string;
+        identifier: string;
+        title: string | null;
+        status: string;
+        name: string | null;
+        updated_at: Date | string;
+      }>;
+
+      const staleTasks: StaleTask[] = staleRows.map((row) => {
+        const updatedAt = row.updated_at instanceof Date ? row.updated_at : new Date(row.updated_at);
+        return {
+          id: String(row.id),
+          identifier: String(row.identifier),
+          title: String(row.title ?? ""),
+          status: String(row.status),
+          agentName: row.name ?? null,
+          staleHours: Math.max(1, Math.round((Date.now() - updatedAt.getTime()) / (1000 * 60 * 60))),
+        };
+      });
 
       return {
         companyId,

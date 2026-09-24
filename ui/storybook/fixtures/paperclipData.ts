@@ -1320,6 +1320,7 @@ export const storybookDashboardSummary: DashboardSummary = {
     pausedAgents: 0,
     pausedProjects: 1,
   },
+  staleTasks: [],
   runActivity: [
     { date: "2026-04-07", succeeded: 4, failed: 0, recovered: 0, other: 1, total: 5, failedByErrorCode: {} },
     { date: "2026-04-08", succeeded: 5, failed: 1, recovered: 0, other: 0, total: 6, failedByErrorCode: { provider_quota: 1 } },
